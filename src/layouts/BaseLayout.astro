@@ -1,0 +1,117 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import NavigationBar from '@/components/layout/NavigationBar';
+import Footer from '@/components/layout/Footer';
+import '@/styles/global.css';
+import '@/styles/fonts.css';
+import portfolioContent from '../../portfolio-content-versioning/2026-08-05-portfolio-content.json';
+
+const siteTitle = 'Hanson Tan';
+const siteDescription = portfolioContent.meta.meta_description;
+const siteURL = 'https://portfolio.hansondev.me';
+
+const { metadata } = Astro.props;
+const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTitle;
+
+const headerNav = [
+  { id: 'about', title: 'About', url: '#about' },
+  { id: 'skills', title: 'Skills', url: '#skills' },
+  { id: 'projects', title: 'Projects', url: '#projects' },
+  { id: 'process', title: 'Process', url: '#process' },
+  { id: 'career', title: 'Career', url: '#career' },
+  { id: 'results', title: 'Results', url: '#results' },
+  { id: 'case-studies', title: 'Case Studies', url: '#case-studies' },
+  { id: 'contact', title: 'Contact', url: '#contact' },
+];
+
+const footerNav = [
+  { id: 'home', title: 'Home', url: '/' },
+  { id: 'about', title: 'About', url: '#about' },
+  { id: 'projects', title: 'Projects', url: '#projects' },
+  { id: 'case-studies', title: 'Case Studies', url: '#case-studies' },
+  { id: 'contact', title: 'Contact', url: '#contact' },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={metadata?.description || siteDescription} />
+    <link rel="icon" href="/favicon.ico" />
+    <meta property="og:image" content="/images/thumbnail.png" />
+
+    {metadata?.openGraph && (
+      <>
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta property="og:description" content={metadata.openGraph.description} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:type" content={metadata.openGraph.type} />
+      </>
+    )}
+
+    <ClientRouter />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      'name': 'Hanson Tan Boon Hong',
+      'givenName': 'Hanson',
+      'familyName': 'Tan',
+      'url': siteURL,
+      'jobTitle': portfolioContent.hero.hero_tagline,
+      'email': portfolioContent.contact.contact_email,
+      'sameAs': [
+        portfolioContent.contact.contact_linkedin,
+        'https://github.com/hansondev',
+      ],
+      'description': siteDescription,
+      'knowsAbout': [
+        'AI Marketing Automation', 'Performance Marketing', 'N8N Workflow Automation',
+        'LLM Integration', 'Meta Ads', 'Google Ads', 'LinkedIn Ads', 'TikTok Ads',
+        'Server-Side Tracking', 'Conversion API', 'RAG Pipelines',
+      ],
+      'worksFor': {
+        '@type': 'Organization',
+        'name': 'Novaticom Global Ltd.',
+      },
+    })} />
+
+    <script is:inline>
+      const getThemePreference = () => {
+        if (localStorage.getItem('theme')) return localStorage.getItem('theme');
+
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      };
+      const applyThemeClass = () => {
+        const isDark = getThemePreference() === 'dark';
+        document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
+      };
+      if (window.__themeHandler) document.removeEventListener('astro:after-swap', window.__themeHandler);
+      window.__themeHandler = applyThemeClass;
+      document.addEventListener('astro:after-swap', applyThemeClass);
+      if (window.__themeObserver) window.__themeObserver.disconnect();
+      const observer = new MutationObserver(() => {
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      window.__themeObserver = observer;
+      applyThemeClass();
+    </script>
+  </head>
+  <body class="antialiased font-sans flex flex-col min-h-screen">
+    <NavigationBar
+      client:load
+      navigation={{ items: headerNav }}
+    />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <Footer
+      client:load
+      navigation={{ items: footerNav }}
+    />
+  </body>
+</html>

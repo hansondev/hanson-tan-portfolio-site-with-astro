@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-color: #112240;
+  --foreground-color: #e8f1fb;
+  --background-color-muted: #1a365d;
+  --surface-color: #1a365d;
+  --border-color: #2d4a6f;
+  --muted-color: #8ba3c7;
+  --accent-color: #7bb5e3;
+  --accent-color-soft: #5a9bd5;
+  --accent-color-dark: color-mix(in srgb, var(--accent-color), black 30%);
+  --accent-color-light: color-mix(in srgb, var(--accent-color), white 30%);
+  --background-variant-color: #1a365d;
+  --input-color: color-mix(in srgb, var(--background-color), var(--foreground-color) 15%);
+}
+
+.dark {
+  --background-color: #112240;
+  --background-color-muted: #1a365d;
+  --background-variant-color: #1a365d;
+  --foreground-color: #e8f1fb;
+  --surface-color: #1a365d;
+  --border-color: #2d4a6f;
+  --muted-color: #8ba3c7;
+}
+
+@layer base {
+  html {
+    @apply bg-[var(--background-color)] text-[var(--foreground-color)];
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+}
+
+@layer components {
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus,
+  a:focus,
+  [role="button"]:focus {
+    @apply outline-none ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-[var(--background-color)];
+  }
+
+  [data-background="dark"] {
+    @apply bg-[var(--surface-color)];
+  }
+}
+
+@layer utilities {
+  a {
+    @apply hover:text-[var(--accent-color)] transition-colors no-underline;
+  }
+}

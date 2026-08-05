@@ -1,0 +1,156 @@
+{
+  "name": "Hanson Dev",
+  "tagline": "Expert software engineering for developers and businesses who demand precision.",
+  "description": "Hanson Dev is a personal brand for a software engineer specializing in high-precision development services. The visual identity conveys technical excellence, stability, and professional credibility through a deep blue palette and clean typography.",
+  "sourceUrl": "designmd://product",
+  "logo": {
+    "primary": "mqzg8esh-2026_HansonDev_Logo_V1.png",
+    "alternates": [],
+    "notes": "Logo is a circular badge with 'HD' initials. Optimized for dark backgrounds; use navy variant on light backgrounds. Maintain 50% clear space. Minimum 32px digital."
+  },
+  "colors": [
+    {
+      "role": "background",
+      "hex": "#112240",
+      "oklch": "oklch(15% 0.06 255)",
+      "name": "Midnight Blue",
+      "usage": "primary page canvas — deep, focused canvas for developer/technical context"
+    },
+    {
+      "role": "surface",
+      "hex": "#1a365d",
+      "oklch": "oklch(22% 0.08 252)",
+      "name": "Deep Navy",
+      "usage": "cards, panels, secondary surfaces — adds depth and hierarchy"
+    },
+    {
+      "role": "accent",
+      "hex": "#7bb5e3",
+      "oklch": "oklch(72% 0.12 235)",
+      "name": "Sky Blue",
+      "usage": "brand accent — CTAs, logo center, highlights, interactive elements"
+    },
+    {
+      "role": "foreground",
+      "hex": "#e8f1fb",
+      "oklch": "oklch(93% 0.03 250)",
+      "name": "Light Text",
+      "usage": "body text and headings on dark backgrounds"
+    },
+    {
+      "role": "muted",
+      "hex": "#8ba3c7",
+      "oklch": "oklch(62% 0.08 235)",
+      "name": "Muted Blue",
+      "usage": "secondary text, metadata, placeholders on dark surfaces"
+    },
+    {
+      "role": "border",
+      "hex": "#2d4a6f",
+      "oklch": "oklch(28% 0.08 248)",
+      "name": "Navy Border",
+      "usage": "rules, dividers, input borders on dark surfaces"
+    },
+    {
+      "role": "accent-secondary",
+      "hex": "#5a9bd5",
+      "oklch": "oklch(65% 0.12 235)",
+      "name": "Steel Blue",
+      "usage": "secondary accent — hover states, secondary CTAs, supporting highlights"
+    }
+  ],
+  "typography": {
+    "display": {
+      "family": "Inter",
+      "fallbacks": [
+        "system-ui",
+        "-apple-system",
+        "Segoe UI",
+        "Helvetica Neue",
+        "Arial",
+        "sans-serif"
+      ],
+      "weights": [
+        400,
+        600,
+        700
+      ]
+    },
+    "body": {
+      "family": "Inter",
+      "fallbacks": [
+        "system-ui",
+        "-apple-system",
+        "Segoe UI",
+        "Helvetica Neue",
+        "Arial",
+        "sans-serif"
+      ],
+      "weights": [
+        400,
+        500
+      ]
+    }
+  },
+  "voice": {
+    "adjectives": [
+      "Technical",
+      "Professional",
+      "Precise"
+    ],
+    "tone": "Speaks as an expert practitioner. Uses facts and clear logic over hype. Helpful and approachable while maintaining technical excellence standards.",
+    "messagingPillars": [
+      "Precision — Every line of code and design choice is intentional",
+      "Technical Excellence — We don't just build; we optimize and master",
+      "Reliability — A brand that stands for stability and trust"
+    ],
+    "vocabulary": {
+      "use": [
+        "Implementation",
+        "Architecture",
+        "Efficiency",
+        "Scalable",
+        "Precision",
+        "Systems",
+        "Performance",
+        "Optimization"
+      ],
+      "avoid": [
+        "Synergy",
+        "Game-changing",
+        "Revolutionary",
+        "Disruptive",
+        "Best-in-class",
+        "Cutting-edge",
+        "World-class"
+      ]
+    }
+  },
+  "imagery": {
+    "style": "Clean, line-based iconography; high-quality technical setups; abstract data visualizations",
+    "subjects": [
+      "Code editor screenshots",
+      "Terminal/CLI output",
+      "Architecture diagrams",
+      "Technical documentation",
+      "Abstract geometric patterns"
+    ],
+    "treatment": "Professional and focused. Technical authenticity over polish. Real code and real outputs preferred over idealized illustrations.",
+    "avoid": [
+      "Stock photos of people pointing at screens",
+      "Generic business imagery",
+      "Excessive use of gradients or decorative elements"
+    ]
+  },
+  "layout": {
+    "radius": "6px",
+    "borderWeight": "1px",
+    "spacing": "8px baseline grid",
+    "postureRules": [
+      "Deep midnight blue primary background creates focused, professional canvas",
+      "Cards use Deep Navy (#1A365D) surfaces with subtle border separation",
+      "Sky Blue accent used sparingly for CTAs, highlights, and interactive elements",
+      "Component kit covers: Button, Card, Form Fields, Navigation, Code Block, Feature Grid, Testimonial, CTA Section"
+    ]
+  }
+}

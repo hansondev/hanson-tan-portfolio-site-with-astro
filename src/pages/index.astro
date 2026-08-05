@@ -1,17 +1,560 @@
 ---
+/* eslint-disable react/jsx-key */
+import Layout from '@/layouts/BaseLayout.astro';
+import portfolioContent from '../../portfolio-content-versioning/2026-08-05-portfolio-content.json';
 
+const { meta, hero, stats, about } = portfolioContent;
+const {
+  ai_automation_use_cases: projectSection,
+  career_experiences: careerSection,
+  core_capabilities: capabilitiesSection,
+  dm_case_studies: caseStudySection,
+  how_i_work: processSection,
+  key_achievements: achievementsSection,
+} = portfolioContent.core;
+
+const aboutParagraphs = about.about_description.split('\n\n');
+
+const projectFilterByCategoryKey: Record<string, string> = {
+  'ads-campaign-ai-automation': 'data-ai',
+  'agent-ai-report-generation': 'data-ai',
+  'agentic-ui-generation': 'agent-infra',
+  'ai-agent-content-generation': 'content-ai',
+  'ai-agentic-chatbot': 'agent-infra',
+  'ai-coding-agent': 'web-dev',
+  'ai-retrieval-augmented-generation': 'data-ai',
+  'content-automation': 'content-ai',
+};
+
+const projects = projectSection.ai_automation_use_cases_cards.map((project, index) => ({
+  id: portfolioContent.projects[index]?.id ?? String(index + 1).padStart(2, '0'),
+  category: project.use_case_category,
+  filter: projectFilterByCategoryKey[project.category_key] ?? '',
+  title: project.use_case,
+  problem: project.problem,
+  solution: project.solution,
+  impact: project.impact,
+  tech_stack: project.tech_stack_text.split(',').map((tech) => tech.trim()).filter(Boolean),
+}));
+
+const process = processSection.how_i_work_cards.map((step) => ({
+  step: step.phase_index,
+  title: step.phase_name,
+  description: step.phase_description,
+}));
+
+const career = careerSection.career_experiences_cards.map((job) => ({
+  company: job.organization_name,
+  role: job.career_title,
+  period: job.career_duration,
+  bullets: job.bullets,
+}));
+
+const caseStudies = caseStudySection.dm_case_studies_cards.map((caseStudy, index) => ({
+  ...caseStudy,
+  subtitle: portfolioContent.case_studies[index]?.subtitle ?? caseStudy.ad_platforms.join(' + '),
+}));
+
+const projectImages: Record<string, string[]> = {
+  '01': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-social-media-content-factory/social-media-content-factory_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '02': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-visual-sales-letter-gen/visual-sales-letter-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '03': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-social-media-posts-autoposting/social-media-posts-autoposting_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '04': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-social-media-ads-copies-gen-automation/social-media-ads-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '05': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-google-slides-ads-report-gen/n8n-ai-google-slides-ads-report-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '07': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-landing-page-content-to-strapi-cms/n8n-ai-landing-page-content-to-strapi-cms_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '08': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-image-prompt-and-image-gen/n8n-ai-image-prompt-and-image-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '09': Array.from({ length: 5 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-rag-system-with-whatsapp-bot-automation/n8n-ai-rag-system-with-whatsapp-bot-automation_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '10': Array.from({ length: 6 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-seo-blog-post-gen/n8n-ai-full-seo-blog-post-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '11': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-google-ads-keywords-and-ad-copies-gen/n8n-ai-full-google-ads-keywords-and-ad-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '12': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-google-ads-keywords-and-ad-copies-gen/n8n-ai-full-google-ads-keywords-and-ad-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '13': Array.from({ length: 6 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-html-based-landing-page-sections-gen/n8n-ai-html-based-landing-page-sections-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
+  '16': Array.from({ length: 9 }, (_, i) => `/images/project-ai-coding-web-dev/chiropractic-wp-site-development/chiropractic-wp-site-development-${i + 1}.jpg`),
+  '17': Array.from({ length: 5 }, (_, i) => `/images/project-ai-coding-web-dev/chiropractic-landing-pages-optimization/chiropractic-landing-pages-optimization-${i + 1}.jpg`),
+  '18': Array.from({ length: 9 }, (_, i) => `/images/project-ai-coding-web-dev/aesthetic-service-wp-site-development/aesthetic-service-wp-site-development-${i + 1}.jpg`),
+};
+
+const caseStudyImages: Record<string, string[]> = {
+  'wellness-shoes': [
+    '/images/performance-mkt-case-studies/wellness-shoes-ecommerce-sem-google-ads/wellness-shoes-ecommerce-sem-google-ads-1.jpg',
+    '/images/performance-mkt-case-studies/wellness-shoes-ecommerce-sem-google-ads/wellness-shoes-ecommerce-sem-google-ads-results.jpg',
+  ],
+  'logistic-services': [
+    '/images/performance-mkt-case-studies/logistic-services-sem-google-ads/logistic-services-sem-google-ads-1.jpg',
+    '/images/performance-mkt-case-studies/logistic-services-sem-google-ads/logistic-services-sem-google-ads-result.jpg',
+  ],
+  'household-paint': [
+    '/images/performance-mkt-case-studies/household-paint-ecommerce/household-paint-ecommerce_image01.jpg',
+    '/images/performance-mkt-case-studies/household-paint-ecommerce/household-paint-ecommerce_image02.jpg',
+  ],
+  'financial-product': [
+    '/images/performance-mkt-case-studies/financial-product-google-ads-demand-gen/financial-product-google-ads-demand-gen-1.jpg',
+    '/images/performance-mkt-case-studies/financial-product-google-ads-demand-gen/financial-product-google-ads-demand-gen-dashboad.jpg',
+  ],
+  'edu-academy-2': [
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-2/education-academy-fb-ads-case-study-2-dashboard.jpg',
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-2/education-academy-fb-ads-case-study-2-results.jpg',
+  ],
+  'edu-academy-3': [
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-3/education-academy-fb-ads-case-study-3-dashboard.jpg',
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-3/education-academy-fb-ads-case-study-3-results.jpg',
+  ],
+  'hospital-1': [
+    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-6-ad-case-study-1/hospital-service-fb-ads-case-study-6-ad-case-study-1.jpg',
+    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-6-ad-case-study-1/hospital-service-fb-ads-case-study-6-ad-case-study-1-results.jpg',
+  ],
+  'edu-academy-1': [
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-1/education-academy-fb-ads-case-study-1.jpg',
+    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-1/education-academy-fb-ads-case-study-1-result.jpg',
+  ],
+  'home-hacking': [
+    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-1.jpg',
+    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-2.jpg',
+    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-3.jpg',
+    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-result.jpg',
+  ],
+  'edu-multi': [
+    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-fb-ads-1.jpg',
+    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-gads-fb-ads-2.jpg',
+    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-gads-fb-ads-results.jpg',
+  ],
+  'hospital-2': [
+    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-2/hospital-service-fb-ads-case-study-2-dashboard.jpg',
+    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-2/hospital-service-fb-ads-case-study-2-results.jpg',
+  ],
+  'gov-tech': [
+    '/images/performance-mkt-case-studies/government-tech-community-fb-ads-optimization/government-tech-community-fb-ads-optimization-1.jpg',
+    '/images/performance-mkt-case-studies/government-tech-community-fb-ads-optimization/government-tech-community-fb-ads-optimization-2.jpg',
+  ],
+};
+
+const allGalleries: Record<string, string[]> = { ...projectImages, ...caseStudyImages };
+
+const caseStudyGalleryIds = [
+  'wellness-shoes',
+  'logistic-services',
+  'household-paint',
+  'home-hacking',
+  'gov-tech',
+  'edu-multi',
+  'edu-academy-1',
+  'edu-academy-2',
+  'edu-academy-3',
+  'hospital-1',
+];
+
+const caseStudiesWithImages = caseStudies.map((caseStudy, index) => ({
+  ...caseStudy,
+  id: caseStudyGalleryIds[index] || `case-study-${index + 1}`,
+}));
+
+const galleriesJson = JSON.stringify(allGalleries);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  metadata={{
+    title: meta.meta_title,
+    description: meta.meta_description,
+    openGraph: {
+      title: meta.meta_title,
+      description: meta.meta_description,
+      url: 'https://portfolio.hansondev.me',
+      type: 'website',
+    },
+  }}
+>
+  <div id="gallery-data" data-json={galleriesJson} hidden></div>
+  <script is:inline>
+    window.__galleries = JSON.parse(document.getElementById('gallery-data').dataset.json);
+    window.__currentGalleryId = '';
+    window.__currentIndex = 0;
+
+    function openLightbox(galleryId, index) {
+      window.__currentGalleryId = galleryId;
+      window.__currentIndex = index;
+      updateLightboxImage();
+      document.getElementById('gallery-dialog').showModal();
+    }
+
+    function updateLightboxImage() {
+      const imgs = window.__galleries[window.__currentGalleryId];
+      if (!imgs) return;
+      const imgEl = document.getElementById('lightbox-img');
+      if (imgEl) imgEl.src = imgs[window.__currentIndex];
+      const counter = document.getElementById('lightbox-counter');
+      if (counter) counter.textContent = (window.__currentIndex + 1) + ' / ' + imgs.length;
+    }
+
+    function prevImage() {
+      const imgs = window.__galleries[window.__currentGalleryId];
+      if (!imgs) return;
+      window.__currentIndex = (window.__currentIndex - 1 + imgs.length) % imgs.length;
+      updateLightboxImage();
+    }
+
+    function nextImage() {
+      const imgs = window.__galleries[window.__currentGalleryId];
+      if (!imgs) return;
+      window.__currentIndex = (window.__currentIndex + 1) % imgs.length;
+      updateLightboxImage();
+    }
+  </script>
+
+  <!-- Hero Section -->
+  <section id="hero" class="py-10 sm:py-16 md:py-24">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="flex flex-col gap-6 items-center text-center">
+        <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl">
+          {hero.hero_tagline}
+        </h2>
+        <p class="font-heading text-foreground font-semibold text-4xl md:text-5xl lg:text-[38px] leading-tight max-w-3xl">
+          {hero.hero_headline}
+        </p>
+        <p class="text-base max-w-2xl text-[var(--muted-color)] leading-relaxed">
+          {hero.hero_description}
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4">
+          <a href="#projects" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold h-10 px-4 py-2 bg-sky text-midnight hover:bg-sky/90 transition-colors">
+            View Projects
+          </a>
+          <a href="#contact" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-10 px-4 py-2 border border-navy-border text-light-text hover:text-sky hover:border-sky transition-colors">
+            Let's Talk
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section id="stats" class="py-10 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {stats.map((stat) => (
+          <div class="flex flex-col items-center rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6 text-center">
+            <span class="text-4xl font-bold tracking-tight text-sky md:text-5xl">{stat.value}</span>
+            <span class="mt-2 text-base font-medium text-[var(--foreground-color)]">{stat.label}</span>
+            <span class="mt-1 text-sm text-[var(--muted-color)]">{stat.context}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-10 md:py-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">{about.about_subheadline}</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{about.about_headline}</p>
+      <div class="flex justify-center mt-8">
+        <img
+          src="/images/personal-image/hanson-tan-profile-photo.jpg"
+          alt="Hanson Tan — Professional Portrait"
+          class="w-40 h-40 rounded-full object-cover border-2 border-[var(--border-color)] shadow-lg"
+          loading="lazy"
+        />
+      </div>
+      <div class="mt-8 space-y-4 text-base leading-relaxed text-[var(--foreground-color)]">
+        {aboutParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+      <div class="flex flex-wrap gap-2 justify-center mt-6">
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">B2B SaaS</span>
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">Healthcare & Wellness</span>
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">E-commerce Growth</span>
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">Fintech & EdTech</span>
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">AI Agent Infrastructure</span>
+        <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-sm text-[var(--muted-color)]">Marketing Automation</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills" class="py-10 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">Capabilities</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">
+        {capabilitiesSection.core_capabilities_headline}
+      </p>
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {capabilitiesSection.core_capabilities_cards.map((capability) => (
+          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6 flex flex-col gap-4">
+            <div>
+              <h3 class="text-xl font-semibold text-[var(--foreground-color)]">{capability.title}</h3>
+              {capability.description && <p class="mt-2 text-sm leading-relaxed text-[var(--muted-color)]">{capability.description}</p>}
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {capability.skill_categories.map((category) => (
+                <span class="rounded-full bg-sky/10 px-3 py-1 text-xs font-medium text-sky">{category}</span>
+              ))}
+            </div>
+            <div class="flex flex-wrap gap-2 pt-3 border-t border-[var(--border-color)]">
+              {capability.tech_stacks_using.map((tech) => (
+                <span class="rounded-full border border-[var(--border-color)] px-3 py-1 text-xs text-[var(--muted-color)]">{tech}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="py-10 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">{projectSection.ai_automation_use_cases_headline}</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{projectSection.ai_automation_use_cases_subheadline}</p>
+      <p class="text-center text-[var(--muted-color)] mt-4 max-w-2xl mx-auto">
+        {projectSection.ai_automation_use_cases_description}
+      </p>
+
+      <!-- Category tabs -->
+      <div class="flex justify-center gap-2 sm:gap-4 mt-8 flex-wrap" id="project-tabs">
+        <button type="button" class="rounded-full bg-sky text-midnight px-4 py-2 text-sm font-semibold cursor-pointer border-0" data-filter="all">All Projects</button>
+        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="content-ai">Content & Creative AI</button>
+        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="data-ai">Data & Paid Media AI</button>
+        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="agent-infra">Agent Infrastructure</button>
+        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="web-dev">Web Development</button>
+      </div>
+
+      <!-- Project Cards Grid -->
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {projects.map((project) => (
+          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6 flex flex-col gap-3" data-filter={project.filter}>
+            {projectImages[project.id] && (
+              <button
+                type="button"
+                class="w-full cursor-pointer border-0 bg-transparent p-0 -mt-2 sm:-mt-3 -mx-2 sm:-mx-3"
+                onclick={`openLightbox('${project.id}', 0)`}
+                aria-label={`View ${projectImages[project.id].length} gallery images for ${project.title}`}
+              >
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-0.5 rounded-t-lg overflow-hidden h-28">
+                  {projectImages[project.id].slice(0, 3).map((img, i) => (
+                    <img
+                      src={img}
+                      alt={`${project.title} screenshot ${i + 1}`}
+                      class="w-full h-28 object-cover"
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+                <div class="relative -mt-6 bg-gradient-to-t from-black/60 to-transparent h-6 rounded-b-lg flex items-end justify-center">
+                  <span class="text-white text-xs font-medium pb-0.5">View {projectImages[project.id].length} images</span>
+                </div>
+              </button>
+            )}
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-sky uppercase">#{project.id}</span>
+              <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{project.category}</span>
+            </div>
+            <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{project.title}</h3>
+            <p class="text-sm text-[var(--muted-color)] leading-relaxed">
+              <strong class="text-[var(--foreground-color)]">Problem:</strong> {project.problem}
+            </p>
+            <p class="text-sm text-[var(--muted-color)] leading-relaxed">
+              <strong class="text-[var(--foreground-color)]">Solution:</strong> {project.solution}
+            </p>
+            <p class="text-sm text-sky font-medium">Impact: {project.impact}</p>
+            <div class="flex flex-wrap gap-1 mt-auto pt-3 border-t border-[var(--border-color)]">
+              {project.tech_stack.map((tech) => (
+                <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{tech}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  <section id="process" class="py-10 md:py-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">{processSection.how_i_work_headline}</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{processSection.how_i_work_subheadline}</p>
+      <ol class="mt-8 flex flex-col gap-8">
+        {process.map((step) => (
+          <li class="relative pl-16">
+            <span class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-sky text-midnight text-lg font-bold" aria-hidden="true">{step.step}</span>
+            <h3 class="text-xl font-semibold text-[var(--foreground-color)]">{step.title}</h3>
+            <p class="mt-2 text-base leading-relaxed text-[var(--muted-color)]">{step.description}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Career Section -->
+  <section id="career" class="py-10 md:py-16">
+    <div class="mx-auto max-w-3xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">Career</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{careerSection.career_experiences_headline}</p>
+      <p class="text-center text-[var(--muted-color)] mt-2">{careerSection.career_experiences_description}</p>
+      <div class="mt-8 space-y-4 sm:space-y-8">
+        {career.map((job) => (
+          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{job.company}</h3>
+              <span class="text-sm text-[var(--muted-color)]">{job.period}</span>
+            </div>
+            <p class="text-sky font-medium">{job.role}</p>
+            <ul class="mt-3 space-y-1">
+              {job.bullets.map((b: string) => (
+                <li class="text-sm text-[var(--muted-color)] flex gap-2"><span class="text-sky">•</span> {b}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Results / Case Studies Section -->
+  <section id="results" class="py-10 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">Proven Results</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">Key Achievements</p>
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {achievementsSection.key_achievements_cards.map((achievement) => (
+          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6">
+            <span class="text-xs font-medium uppercase tracking-wide text-sky">{achievement.category}</span>
+            <h3 class="mt-3 text-lg font-semibold leading-snug text-[var(--foreground-color)]">{achievement.title}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-[var(--muted-color)]">{achievement.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Case Studies Gallery Section -->
+  <section id="case-studies" class="py-10 md:py-16">
+    <div class="mx-auto max-w-6xl px-4">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">Case Studies</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{caseStudySection.dm_case_studies_headline}</p>
+      <p class="text-center text-[var(--muted-color)] mt-4 max-w-2xl mx-auto">
+        Selected performance marketing case studies from Google Ads, Meta Ads, and cross-channel paid media campaigns.
+      </p>
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {caseStudiesWithImages.map((cs) => {
+          const images = caseStudyImages[cs.id] || [];
+
+          return (
+          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden flex flex-col">
+            {images.length > 0 && (
+              <button
+                type="button"
+                class="w-full cursor-pointer border-0 bg-transparent p-0 group"
+                onclick={`openLightbox('${cs.id}', 0)`}
+                aria-label={`View case study gallery: ${cs.title}`}
+              >
+                <div class="relative h-48 overflow-hidden">
+                  <img
+                    src={images[0]}
+                    alt={`${cs.title} - campaign dashboard`}
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span class="text-white text-sm font-semibold px-3 py-1.5 rounded-full border border-white/40">View {images.length} images</span>
+                  </div>
+                </div>
+              </button>
+            )}
+            <div class="p-4 sm:p-5 flex flex-col gap-2 flex-grow">
+              <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{cs.title}</h3>
+              <span class="text-xs font-medium text-sky uppercase">{cs.subtitle}</span>
+              <p class="text-sm text-[var(--muted-color)] leading-relaxed">{cs.description}</p>
+            </div>
+          </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-10 md:py-16">
+    <div class="mx-auto max-w-2xl px-4 text-center">
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl">{portfolioContent.contact.contact_subheadline}</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl mt-2">{portfolioContent.contact.contact_headline}</p>
+      <p class="mt-4 text-[var(--muted-color)] leading-relaxed">
+        {portfolioContent.contact.contact_description}
+      </p>
+      <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mt-8">
+        <a href={`mailto:${portfolioContent.contact.contact_email}`} class="inline-flex items-center gap-2 rounded-md bg-sky text-midnight px-6 py-3 font-semibold hover:bg-sky/90 transition-colors">
+          Email Me
+        </a>
+        <a href={portfolioContent.contact.contact_linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
+          LinkedIn
+        </a>
+        <a href={portfolioContent.contact.contant_whatsapp} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Dialog -->
+  <dialog id="gallery-dialog" class="fixed inset-0 z-50 bg-transparent backdrop:bg-black/85 backdrop:backdrop-blur-sm w-full h-full max-w-full max-h-full border-0 p-0 m-0">
+    <div class="flex flex-col items-center justify-center w-full h-full relative" onclick="document.getElementById('gallery-dialog').close()">
+      <img
+        id="lightbox-img"
+        src=""
+        alt="Gallery image"
+        class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
+        onclick="event.stopPropagation()"
+      />
+      <span id="lightbox-counter" class="text-white text-sm mt-4 font-medium"></span>
+      <button type="button" class="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-black/70 rounded-full p-3 transition-colors" onclick="event.stopPropagation(); prevImage()" aria-label="Previous image">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-black/70 rounded-full p-3 transition-colors" onclick="event.stopPropagation(); nextImage()" aria-label="Next image">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button type="button" class="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors" onclick="event.stopPropagation(); document.getElementById('gallery-dialog').close()" aria-label="Close gallery">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+  </dialog>
+
+  <script is:inline>
+    document.addEventListener('keydown', (e) => {
+      const dialog = document.getElementById('gallery-dialog');
+      if (!dialog || !dialog.open) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevImage(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); nextImage(); }
+      if (e.key === 'Escape') { e.preventDefault(); dialog.close(); }
+    });
+  </script>
+
+  <!-- Tab filtering -->
+  <script is:inline>
+    (function () {
+      const tabs = document.getElementById('project-tabs');
+      if (!tabs) return;
+
+      tabs.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-filter]');
+        if (!btn) return;
+
+        const filter = btn.getAttribute('data-filter');
+
+        // Update active tab styling
+        tabs.querySelectorAll('[data-filter]').forEach(function (t) {
+          if (t === btn) {
+            t.className = 'rounded-full bg-sky text-midnight px-4 py-2 text-sm font-semibold cursor-pointer border-0';
+          } else {
+            t.className = 'rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors';
+          }
+        });
+
+        // Filter cards (only those inside the projects section grid)
+        const projectCards = document.querySelectorAll('#projects .grid > [data-filter]');
+        projectCards.forEach(function (card) {
+          const cardFilter = card.getAttribute('data-filter');
+          if (filter === 'all' || cardFilter === filter) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    })();
+  </script>
+</Layout>

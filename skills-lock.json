@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "create-agentsmd": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/create-agentsmd/SKILL.md",
+      "computedHash": "bfbdbb76b17cca970d1d624e36ce72b6847860d740581c8865da796c1fef8552"
+    },
+    "git-commit": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/git-commit/SKILL.md",
+      "computedHash": "2607fc60629b82b257136dd2a7a373f0a4466c0b49df7746d845d59313c99b21"
+    },
+    "react": {
+      "source": "lobehub/lobehub",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/react/SKILL.md",
+      "computedHash": "c3fa38e2e0e2532a2a5a39fea780c22b9e0e485f172a3a4c6234615a75183131"
+    },
+    "sop-creator": {
+      "source": "coleam00/second-brain-skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/sop-creator/SKILL.md",
+      "computedHash": "129b84b7d852a5f6175c4ee5c615b3cdd520675b7b29b86791d2fbdcbb46839b"
+    }
+  }
+}
