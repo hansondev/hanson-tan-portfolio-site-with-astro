@@ -7,6 +7,10 @@ dist/
 .wiki/
 node_modules/
 reference-portfolio-docs/
+html-templates/
+n8n_workflows/
+portfolio-content-versioning/
+nocodb-portfolio-json-data/
 prompt-template/
 tsconfig.tsbuildinfo
 .env

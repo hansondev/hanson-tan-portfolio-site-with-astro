@@ -1,23 +1,100 @@
 ---
 /* eslint-disable react/jsx-key */
 import Layout from '@/layouts/BaseLayout.astro';
-import portfolioContent from '../../portfolio-content-versioning/2026-08-05-portfolio-content.json';
+import portfolioContent from '../../portfolio-content-versioning/2026-08-14-portfolio-content.json';
 
-const { meta, hero, stats, about } = portfolioContent;
+type PortfolioCore = typeof portfolioContent.core & {
+  ai_web_dev_projects: {
+    ai_web_dev_projects_headline: string;
+    ai_web_dev_projects_subheadline: string;
+    ai_web_dev_projects_description: string;
+    ai_web_dev_projects_cards: UseCaseCard[];
+  };
+  ai_performance_marketing_use_cases: {
+    ai_performance_marketing_use_cases_headline: string;
+    ai_performance_marketing_use_cases_subheadline: string;
+    ai_performance_marketing_use_cases_description: string;
+    ai_performance_marketing_use_cases_cards: UseCaseCard[];
+  };
+  ai_seo_use_cases: {
+    ai_seo_use_cases_headline: string;
+    ai_seo_use_cases_subheadline: string;
+    ai_seo_use_cases_description: string;
+    ai_seo_use_cases_cards: UseCaseCard[];
+  };
+};
+
+const { meta, hero, stats, about, contact } = portfolioContent;
+const portfolioCore = portfolioContent.core as PortfolioCore;
 const {
   ai_automation_use_cases: projectSection,
+  ai_performance_marketing_use_cases: performanceMarketingSection,
+  ai_seo_use_cases: seoSection,
+  ai_web_dev_projects: webDevSection,
   career_experiences: careerSection,
   core_capabilities: capabilitiesSection,
   dm_case_studies: caseStudySection,
   how_i_work: processSection,
-  key_achievements: achievementsSection,
-} = portfolioContent.core;
+} = portfolioCore;
 
 const aboutParagraphs = about.about_description.split('\n\n');
 
+type PortfolioMediaItem = {
+  imageUrl: string;
+  altText: string;
+};
+
+type PortfolioVideoItem = {
+  videoUrl: string;
+};
+
+type PortfolioProject = {
+  id: string;
+  displayId: string;
+  category: string;
+  filter: string;
+  title: string;
+  problem: string;
+  solution: string;
+  impact: string;
+  tech_stack: string[];
+  images: PortfolioMediaItem[];
+  videos: PortfolioVideoItem[];
+};
+
+type PortfolioCaseStudy = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  business_model: string;
+  ad_platforms: string[];
+  images: PortfolioMediaItem[];
+  videos: PortfolioVideoItem[];
+};
+
+type UseCaseCard = {
+  use_case?: string;
+  use_case_category?: string;
+  category_key?: string;
+  problem?: string;
+  solution?: string;
+  impact?: string;
+  tech_stack_text?: string;
+  tech_stack?: string[];
+  images?: PortfolioMediaItem[];
+  videos?: PortfolioVideoItem[];
+};
+
+const normalizeText = (value: string) => value.replace(/\r/g, '').trim().toLowerCase();
+
 const projectFilterByCategoryKey: Record<string, string> = {
   'ads-campaign-ai-automation': 'data-ai',
+  'ai-agent-ads-campaign-optimization': 'data-ai',
+  'ai-agent-competitor-analysis': 'data-ai',
   'agent-ai-report-generation': 'data-ai',
+  'ai-agent-report-generation': 'data-ai',
+  'ai-agent-search-engine-optimization': 'data-ai',
   'agentic-ui-generation': 'agent-infra',
   'ai-agent-content-generation': 'content-ai',
   'ai-agentic-chatbot': 'agent-infra',
@@ -26,16 +103,105 @@ const projectFilterByCategoryKey: Record<string, string> = {
   'content-automation': 'content-ai',
 };
 
-const projects = projectSection.ai_automation_use_cases_cards.map((project, index) => ({
-  id: portfolioContent.projects[index]?.id ?? String(index + 1).padStart(2, '0'),
-  category: project.use_case_category,
-  filter: projectFilterByCategoryKey[project.category_key] ?? '',
-  title: project.use_case,
-  problem: project.problem,
-  solution: project.solution,
-  impact: project.impact,
-  tech_stack: project.tech_stack_text.split(',').map((tech) => tech.trim()).filter(Boolean),
-}));
+const projectMediaByTitle = new Map(
+  portfolioContent.projects.map((project) => [normalizeText(project.title), project]),
+);
+
+const toProjectCards = (cards: UseCaseCard[], groupKey: string): PortfolioProject[] => cards.map((project, index) => {
+  const title = project.use_case ?? '';
+  const media = projectMediaByTitle.get(normalizeText(title));
+  const displayId = String(index + 1).padStart(2, '0');
+  const techStack = project.tech_stack_text
+    ? project.tech_stack_text.split(',').map((tech) => tech.trim()).filter(Boolean)
+    : project.tech_stack ?? [];
+
+  return {
+    id: `${groupKey}-${displayId}`,
+    displayId,
+    category: project.use_case_category ?? '',
+    filter: projectFilterByCategoryKey[project.category_key ?? ''] ?? '',
+    title,
+    problem: project.problem ?? '',
+    solution: project.solution ?? '',
+    impact: project.impact ?? '',
+    tech_stack: techStack,
+    images: project.images ?? media?.images ?? [],
+    videos: project.videos ?? media?.videos ?? [],
+  };
+});
+
+const projects = toProjectCards(projectSection.ai_automation_use_cases_cards, 'automation');
+const webDevProjects = toProjectCards(webDevSection.ai_web_dev_projects_cards, 'web-dev');
+const performanceMarketingProjects = toProjectCards(
+  performanceMarketingSection.ai_performance_marketing_use_cases_cards,
+  'performance',
+);
+const seoProjects = toProjectCards(seoSection.ai_seo_use_cases_cards, 'seo');
+
+const projectFilters = [
+  {
+    label: 'All Projects',
+    value: 'all',
+    className: 'rounded-full bg-sky text-midnight px-4 py-2 text-sm font-semibold cursor-pointer border-0',
+  },
+  {
+    label: 'Content & Creative AI',
+    value: 'content-ai',
+    className: 'rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors',
+  },
+  {
+    label: 'Data & Paid Media AI',
+    value: 'data-ai',
+    className: 'rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors',
+  },
+  {
+    label: 'Agent Infrastructure',
+    value: 'agent-infra',
+    className: 'rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors',
+  },
+  {
+    label: 'Web Development',
+    value: 'web-dev',
+    className: 'rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors',
+  },
+];
+
+const projectGroups = [
+  {
+    id: 'projects',
+    headline: projectSection.ai_automation_use_cases_headline,
+    subheadline: projectSection.ai_automation_use_cases_subheadline,
+    description: projectSection.ai_automation_use_cases_description,
+    cards: projects,
+    filters: projectFilters,
+  },
+  {
+    id: 'ai-web-dev-projects',
+    headline: webDevSection.ai_web_dev_projects_headline,
+    subheadline: webDevSection.ai_web_dev_projects_subheadline,
+    description: webDevSection.ai_web_dev_projects_description,
+    cards: webDevProjects,
+    filters: [],
+  },
+  {
+    id: 'ai-performance-marketing-use-cases',
+    headline: performanceMarketingSection.ai_performance_marketing_use_cases_headline,
+    subheadline: performanceMarketingSection.ai_performance_marketing_use_cases_subheadline,
+    description: performanceMarketingSection.ai_performance_marketing_use_cases_description,
+    cards: performanceMarketingProjects,
+    filters: [],
+  },
+  {
+    id: 'ai-seo-use-cases',
+    headline: seoSection.ai_seo_use_cases_headline,
+    subheadline: seoSection.ai_seo_use_cases_subheadline,
+    description: seoSection.ai_seo_use_cases_description,
+    cards: seoProjects,
+    filters: [],
+  },
+];
+
+const allProjectCards = projectGroups.flatMap((group) => group.cards);
 
 const process = processSection.how_i_work_cards.map((step) => ({
   step: step.phase_index,
@@ -50,102 +216,25 @@ const career = careerSection.career_experiences_cards.map((job) => ({
   bullets: job.bullets,
 }));
 
-const caseStudies = caseStudySection.dm_case_studies_cards.map((caseStudy, index) => ({
-  ...caseStudy,
-  subtitle: portfolioContent.case_studies[index]?.subtitle ?? caseStudy.ad_platforms.join(' + '),
+const caseStudies = portfolioContent.case_studies.map((caseStudy, index) => ({
+  id: `case-study-${String(index + 1).padStart(2, '0')}`,
+  title: caseStudy.title,
+  subtitle: caseStudy.subtitle,
+  description: caseStudy.description,
+  business_model: caseStudy.business_model,
+  ad_platforms: caseStudy.ad_platforms,
+  images: caseStudy.images ?? [],
+  videos: [],
 }));
 
-const projectImages: Record<string, string[]> = {
-  '01': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-social-media-content-factory/social-media-content-factory_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '02': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-visual-sales-letter-gen/visual-sales-letter-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '03': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-social-media-posts-autoposting/social-media-posts-autoposting_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '04': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-social-media-ads-copies-gen-automation/social-media-ads-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '05': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-google-slides-ads-report-gen/n8n-ai-google-slides-ads-report-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '07': Array.from({ length: 2 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-landing-page-content-to-strapi-cms/n8n-ai-landing-page-content-to-strapi-cms_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '08': Array.from({ length: 3 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-image-prompt-and-image-gen/n8n-ai-image-prompt-and-image-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '09': Array.from({ length: 5 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-rag-system-with-whatsapp-bot-automation/n8n-ai-rag-system-with-whatsapp-bot-automation_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '10': Array.from({ length: 6 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-seo-blog-post-gen/n8n-ai-full-seo-blog-post-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '11': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-google-ads-keywords-and-ad-copies-gen/n8n-ai-full-google-ads-keywords-and-ad-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '12': Array.from({ length: 7 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-full-google-ads-keywords-and-ad-copies-gen/n8n-ai-full-google-ads-keywords-and-ad-copies-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '13': Array.from({ length: 6 }, (_, i) => `/images/ai-powered-marketing-use-cases/n8n-ai-html-based-landing-page-sections-gen/n8n-ai-html-based-landing-page-sections-gen_image-${String(i + 1).padStart(2, '0')}.jpeg`),
-  '16': Array.from({ length: 9 }, (_, i) => `/images/project-ai-coding-web-dev/chiropractic-wp-site-development/chiropractic-wp-site-development-${i + 1}.jpg`),
-  '17': Array.from({ length: 5 }, (_, i) => `/images/project-ai-coding-web-dev/chiropractic-landing-pages-optimization/chiropractic-landing-pages-optimization-${i + 1}.jpg`),
-  '18': Array.from({ length: 9 }, (_, i) => `/images/project-ai-coding-web-dev/aesthetic-service-wp-site-development/aesthetic-service-wp-site-development-${i + 1}.jpg`),
-};
-
-const caseStudyImages: Record<string, string[]> = {
-  'wellness-shoes': [
-    '/images/performance-mkt-case-studies/wellness-shoes-ecommerce-sem-google-ads/wellness-shoes-ecommerce-sem-google-ads-1.jpg',
-    '/images/performance-mkt-case-studies/wellness-shoes-ecommerce-sem-google-ads/wellness-shoes-ecommerce-sem-google-ads-results.jpg',
-  ],
-  'logistic-services': [
-    '/images/performance-mkt-case-studies/logistic-services-sem-google-ads/logistic-services-sem-google-ads-1.jpg',
-    '/images/performance-mkt-case-studies/logistic-services-sem-google-ads/logistic-services-sem-google-ads-result.jpg',
-  ],
-  'household-paint': [
-    '/images/performance-mkt-case-studies/household-paint-ecommerce/household-paint-ecommerce_image01.jpg',
-    '/images/performance-mkt-case-studies/household-paint-ecommerce/household-paint-ecommerce_image02.jpg',
-  ],
-  'financial-product': [
-    '/images/performance-mkt-case-studies/financial-product-google-ads-demand-gen/financial-product-google-ads-demand-gen-1.jpg',
-    '/images/performance-mkt-case-studies/financial-product-google-ads-demand-gen/financial-product-google-ads-demand-gen-dashboad.jpg',
-  ],
-  'edu-academy-2': [
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-2/education-academy-fb-ads-case-study-2-dashboard.jpg',
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-2/education-academy-fb-ads-case-study-2-results.jpg',
-  ],
-  'edu-academy-3': [
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-3/education-academy-fb-ads-case-study-3-dashboard.jpg',
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-3/education-academy-fb-ads-case-study-3-results.jpg',
-  ],
-  'hospital-1': [
-    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-6-ad-case-study-1/hospital-service-fb-ads-case-study-6-ad-case-study-1.jpg',
-    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-6-ad-case-study-1/hospital-service-fb-ads-case-study-6-ad-case-study-1-results.jpg',
-  ],
-  'edu-academy-1': [
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-1/education-academy-fb-ads-case-study-1.jpg',
-    '/images/performance-mkt-case-studies/education-academy-fb-ads-case-study-1/education-academy-fb-ads-case-study-1-result.jpg',
-  ],
-  'home-hacking': [
-    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-1.jpg',
-    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-2.jpg',
-    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-3.jpg',
-    '/images/performance-mkt-case-studies/home-hacking-service-sem-google-ads/home-hacking-service-sem-google-ads-result.jpg',
-  ],
-  'edu-multi': [
-    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-fb-ads-1.jpg',
-    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-gads-fb-ads-2.jpg',
-    '/images/performance-mkt-case-studies/education-academy-sem-gads-fb-ads/education-academy-sem-gads-fb-ads-results.jpg',
-  ],
-  'hospital-2': [
-    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-2/hospital-service-fb-ads-case-study-2-dashboard.jpg',
-    '/images/performance-mkt-case-studies/hospital-service-fb-ads-case-study-2/hospital-service-fb-ads-case-study-2-results.jpg',
-  ],
-  'gov-tech': [
-    '/images/performance-mkt-case-studies/government-tech-community-fb-ads-optimization/government-tech-community-fb-ads-optimization-1.jpg',
-    '/images/performance-mkt-case-studies/government-tech-community-fb-ads-optimization/government-tech-community-fb-ads-optimization-2.jpg',
-  ],
-};
-
-const allGalleries: Record<string, string[]> = { ...projectImages, ...caseStudyImages };
-
-const caseStudyGalleryIds = [
-  'wellness-shoes',
-  'logistic-services',
-  'household-paint',
-  'home-hacking',
-  'gov-tech',
-  'edu-multi',
-  'edu-academy-1',
-  'edu-academy-2',
-  'edu-academy-3',
-  'hospital-1',
-];
-
-const caseStudiesWithImages = caseStudies.map((caseStudy, index) => ({
-  ...caseStudy,
-  id: caseStudyGalleryIds[index] || `case-study-${index + 1}`,
-}));
+const allGalleries: Record<string, string[]> = Object.fromEntries(
+  [
+    ...allProjectCards,
+    ...caseStudies,
+  ]
+    .filter((item) => item.images.length > 0)
+    .map((item) => [item.id, item.images.map((image) => image.imageUrl)]),
+);
 
 const galleriesJson = JSON.stringify(allGalleries);
 ---
@@ -163,10 +252,17 @@ const galleriesJson = JSON.stringify(allGalleries);
   }}
 >
   <div id="gallery-data" data-json={galleriesJson} hidden></div>
+  <div
+    id="video-data"
+    data-json={JSON.stringify(Object.fromEntries([...allProjectCards, ...caseStudies].filter((item) => item.videos.length > 0).map((item) => [item.id, item.videos[0].videoUrl])))}
+    hidden
+  ></div>
   <script is:inline>
     window.__galleries = JSON.parse(document.getElementById('gallery-data').dataset.json);
+    window.__videos = JSON.parse(document.getElementById('video-data').dataset.json);
     window.__currentGalleryId = '';
     window.__currentIndex = 0;
+    window.__currentVideoId = '';
 
     function openLightbox(galleryId, index) {
       window.__currentGalleryId = galleryId;
@@ -197,6 +293,31 @@ const galleriesJson = JSON.stringify(allGalleries);
       window.__currentIndex = (window.__currentIndex + 1) % imgs.length;
       updateLightboxImage();
     }
+
+    function openVideoModal(videoId) {
+      window.__currentVideoId = videoId;
+      const dialog = document.getElementById('video-dialog');
+      const video = document.getElementById('portfolio-video');
+      const source = window.__videos[videoId];
+      if (!dialog || !video || !source) return;
+
+      video.src = source;
+      dialog.showModal();
+    }
+
+    function closeVideoModal() {
+      const dialog = document.getElementById('video-dialog');
+      const video = document.getElementById('portfolio-video');
+      if (video) {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      }
+      if (dialog?.open) dialog.close();
+    }
+
+    window.openVideoModal = openVideoModal;
+    window.closeVideoModal = closeVideoModal;
   </script>
 
   <!-- Hero Section -->
@@ -297,71 +418,81 @@ const galleriesJson = JSON.stringify(allGalleries);
   </section>
 
   <!-- Projects Section -->
-  <section id="projects" class="py-10 md:py-16">
-    <div class="mx-auto max-w-6xl px-4">
-      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">{projectSection.ai_automation_use_cases_headline}</h2>
-      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{projectSection.ai_automation_use_cases_subheadline}</p>
-      <p class="text-center text-[var(--muted-color)] mt-4 max-w-2xl mx-auto">
-        {projectSection.ai_automation_use_cases_description}
-      </p>
+  {projectGroups.map((group) => (
+    <section id={group.id} class="py-10 md:py-16">
+      <div class="mx-auto max-w-6xl px-4">
+        <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">{group.headline}</h2>
+        <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">{group.subheadline}</p>
+        <p class="text-center text-[var(--muted-color)] mt-4 max-w-2xl mx-auto">
+          {group.description}
+        </p>
 
-      <!-- Category tabs -->
-      <div class="flex justify-center gap-2 sm:gap-4 mt-8 flex-wrap" id="project-tabs">
-        <button type="button" class="rounded-full bg-sky text-midnight px-4 py-2 text-sm font-semibold cursor-pointer border-0" data-filter="all">All Projects</button>
-        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="content-ai">Content & Creative AI</button>
-        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="data-ai">Data & Paid Media AI</button>
-        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="agent-infra">Agent Infrastructure</button>
-        <button type="button" class="rounded-full border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--muted-color)] cursor-pointer bg-transparent hover:text-sky hover:border-sky transition-colors" data-filter="web-dev">Web Development</button>
-      </div>
-
-      <!-- Project Cards Grid -->
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {projects.map((project) => (
-          <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6 flex flex-col gap-3" data-filter={project.filter}>
-            {projectImages[project.id] && (
-              <button
-                type="button"
-                class="w-full cursor-pointer border-0 bg-transparent p-0 -mt-2 sm:-mt-3 -mx-2 sm:-mx-3"
-                onclick={`openLightbox('${project.id}', 0)`}
-                aria-label={`View ${projectImages[project.id].length} gallery images for ${project.title}`}
-              >
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-0.5 rounded-t-lg overflow-hidden h-28">
-                  {projectImages[project.id].slice(0, 3).map((img, i) => (
-                    <img
-                      src={img}
-                      alt={`${project.title} screenshot ${i + 1}`}
-                      class="w-full h-28 object-cover"
-                      loading="lazy"
-                    />
-                  ))}
-                </div>
-                <div class="relative -mt-6 bg-gradient-to-t from-black/60 to-transparent h-6 rounded-b-lg flex items-end justify-center">
-                  <span class="text-white text-xs font-medium pb-0.5">View {projectImages[project.id].length} images</span>
-                </div>
-              </button>
-            )}
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-sky uppercase">#{project.id}</span>
-              <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{project.category}</span>
-            </div>
-            <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{project.title}</h3>
-            <p class="text-sm text-[var(--muted-color)] leading-relaxed">
-              <strong class="text-[var(--foreground-color)]">Problem:</strong> {project.problem}
-            </p>
-            <p class="text-sm text-[var(--muted-color)] leading-relaxed">
-              <strong class="text-[var(--foreground-color)]">Solution:</strong> {project.solution}
-            </p>
-            <p class="text-sm text-sky font-medium">Impact: {project.impact}</p>
-            <div class="flex flex-wrap gap-1 mt-auto pt-3 border-t border-[var(--border-color)]">
-              {project.tech_stack.map((tech) => (
-                <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{tech}</span>
-              ))}
-            </div>
+        {group.filters.length > 0 && (
+          <div class="flex justify-center gap-2 sm:gap-4 mt-8 flex-wrap" id="project-tabs">
+            {group.filters.map((filter) => (
+              <button type="button" class={filter.className} data-filter={filter.value}>{filter.label}</button>
+            ))}
           </div>
-        ))}
+        )}
+
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {group.cards.map((project) => (
+            <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6 flex flex-col gap-3" data-filter={project.filter}>
+              {project.images.length > 0 && (
+                <button
+                  type="button"
+                  class="w-full cursor-pointer border-0 bg-transparent p-0 -mt-2 sm:-mt-3 -mx-2 sm:-mx-3"
+                  onclick={`openLightbox('${project.id}', 0)`}
+                  aria-label={`View ${project.images.length} gallery images for ${project.title}`}
+                >
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-0.5 rounded-t-lg overflow-hidden h-28">
+                    {project.images.slice(0, 3).map((img: PortfolioMediaItem, i: number) => (
+                      <img
+                        src={img.imageUrl}
+                        alt={img.altText || `${project.title} screenshot ${i + 1}`}
+                        class="w-full h-28 object-cover"
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                  <div class="relative -mt-6 bg-gradient-to-t from-black/60 to-transparent h-6 rounded-b-lg flex items-end justify-center">
+                    <span class="text-white text-xs font-medium pb-0.5">View {project.images.length} images</span>
+                  </div>
+                </button>
+              )}
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-sky uppercase">#{project.displayId}</span>
+                <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{project.category}</span>
+              </div>
+              <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{project.title}</h3>
+              <p class="text-sm text-[var(--muted-color)] leading-relaxed">
+                <strong class="text-[var(--foreground-color)]">Problem:</strong> {project.problem}
+              </p>
+              <p class="text-sm text-[var(--muted-color)] leading-relaxed">
+                <strong class="text-[var(--foreground-color)]">Solution:</strong> {project.solution}
+              </p>
+              <p class="text-sm text-sky font-medium">Impact: {project.impact}</p>
+              <div class="flex flex-wrap gap-1 mt-auto pt-3 border-t border-[var(--border-color)]">
+                {project.tech_stack.map((tech) => (
+                  <span class="rounded-full border border-[var(--border-color)] px-2 py-0.5 text-xs text-[var(--muted-color)]">{tech}</span>
+                ))}
+              </div>
+              {project.videos.length > 0 && (
+                <button
+                  type="button"
+                  class="mt-3 inline-flex items-center justify-center rounded-md border border-sky px-3 py-2 text-sm font-semibold text-sky transition-colors hover:bg-sky hover:text-midnight"
+                  onclick={`openVideoModal('${project.id}')`}
+                  aria-label={`Watch video for ${project.title}`}
+                >
+                  Watch Video
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  ))}
 
   <!-- Process Section -->
   <section id="process" class="py-10 md:py-16">
@@ -411,11 +542,11 @@ const galleriesJson = JSON.stringify(allGalleries);
       <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl text-center">Proven Results</h2>
       <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl text-center mt-2">Key Achievements</p>
       <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {achievementsSection.key_achievements_cards.map((achievement) => (
+        {portfolioContent.results.map((result) => (
           <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 sm:p-6">
-            <span class="text-xs font-medium uppercase tracking-wide text-sky">{achievement.category}</span>
-            <h3 class="mt-3 text-lg font-semibold leading-snug text-[var(--foreground-color)]">{achievement.title}</h3>
-            <p class="mt-3 text-sm leading-relaxed text-[var(--muted-color)]">{achievement.description}</p>
+            <span class="text-4xl font-bold tracking-tight text-sky">{result.metric}</span>
+            <h3 class="mt-3 text-lg font-semibold leading-snug text-[var(--foreground-color)]">{result.label}</h3>
+            <p class="mt-3 text-sm leading-relaxed text-[var(--muted-color)]">{result.description}</p>
           </div>
         ))}
       </div>
@@ -431,8 +562,10 @@ const galleriesJson = JSON.stringify(allGalleries);
         Selected performance marketing case studies from Google Ads, Meta Ads, and cross-channel paid media campaigns.
       </p>
       <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {caseStudiesWithImages.map((cs) => {
-          const images = caseStudyImages[cs.id] || [];
+        {caseStudies.map((cs) => {
+          const images = cs.images as PortfolioMediaItem[];
+          const videos = cs.videos as PortfolioVideoItem[];
+          const hasVideo = videos.length > 0;
 
           return (
           <div class="rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden flex flex-col">
@@ -445,8 +578,8 @@ const galleriesJson = JSON.stringify(allGalleries);
               >
                 <div class="relative h-48 overflow-hidden">
                   <img
-                    src={images[0]}
-                    alt={`${cs.title} - campaign dashboard`}
+                    src={images[0].imageUrl}
+                    alt={images[0].altText || `${cs.title} - campaign dashboard`}
                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   />
@@ -456,12 +589,22 @@ const galleriesJson = JSON.stringify(allGalleries);
                 </div>
               </button>
             )}
-            <div class="p-4 sm:p-5 flex flex-col gap-2 flex-grow">
-              <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{cs.title}</h3>
-              <span class="text-xs font-medium text-sky uppercase">{cs.subtitle}</span>
-              <p class="text-sm text-[var(--muted-color)] leading-relaxed">{cs.description}</p>
+              <div class="p-4 sm:p-5 flex flex-col gap-2 flex-grow">
+                <h3 class="text-lg font-semibold text-[var(--foreground-color)]">{cs.title}</h3>
+                <span class="text-xs font-medium text-sky uppercase">{cs.subtitle}</span>
+                <p class="text-sm text-[var(--muted-color)] leading-relaxed">{cs.description}</p>
+                {hasVideo && (
+                  <button
+                    type="button"
+                    class="mt-2 inline-flex items-center justify-center rounded-md border border-sky px-3 py-2 text-sm font-semibold text-sky transition-colors hover:bg-sky hover:text-midnight"
+                    onclick={`openVideoModal('${cs.id}')`}
+                    aria-label={`Watch video for ${cs.title}`}
+                  >
+                    Watch Video
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
           );
         })}
       </div>
@@ -471,19 +614,19 @@ const galleriesJson = JSON.stringify(allGalleries);
   <!-- Contact Section -->
   <section id="contact" class="py-10 md:py-16">
     <div class="mx-auto max-w-2xl px-4 text-center">
-      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl">{portfolioContent.contact.contact_subheadline}</h2>
-      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl mt-2">{portfolioContent.contact.contact_headline}</p>
+      <h2 class="font-heading text-accent font-normal uppercase text-lg md:text-xl">{contact.contact_subheadline}</h2>
+      <p class="font-heading text-foreground font-semibold text-3xl md:text-4xl mt-2">{contact.contact_headline}</p>
       <p class="mt-4 text-[var(--muted-color)] leading-relaxed">
-        {portfolioContent.contact.contact_description}
+        {contact.contact_description}
       </p>
       <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mt-8">
-        <a href={`mailto:${portfolioContent.contact.contact_email}`} class="inline-flex items-center gap-2 rounded-md bg-sky text-midnight px-6 py-3 font-semibold hover:bg-sky/90 transition-colors">
+        <a href={`mailto:${contact.contact_email}`} class="inline-flex items-center gap-2 rounded-md bg-sky text-midnight px-6 py-3 font-semibold hover:bg-sky/90 transition-colors">
           Email Me
         </a>
-        <a href={portfolioContent.contact.contact_linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
+        <a href={contact.contact_linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
           LinkedIn
         </a>
-        <a href={portfolioContent.contact.contant_whatsapp} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
+        <a href={contact.contant_whatsapp} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-md border border-navy-border text-light-text px-6 py-3 hover:text-sky hover:border-sky transition-colors">
           WhatsApp
         </a>
       </div>
@@ -513,6 +656,17 @@ const galleriesJson = JSON.stringify(allGalleries);
     </div>
   </dialog>
 
+  <dialog id="video-dialog" class="fixed inset-0 z-50 bg-transparent backdrop:bg-black/85 backdrop:backdrop-blur-sm w-full h-full max-w-full max-h-full border-0 p-0 m-0">
+    <div class="flex h-full w-full items-center justify-center p-4" onclick="closeVideoModal()">
+      <div class="relative w-full max-w-4xl rounded-lg border border-[var(--border-color)] bg-[var(--surface-color)] p-4 shadow-2xl" onclick="event.stopPropagation()">
+        <button type="button" class="absolute right-4 top-4 rounded-full border border-[var(--border-color)] px-3 py-2 text-sm text-[var(--muted-color)] hover:text-sky hover:border-sky transition-colors" onclick="closeVideoModal()" aria-label="Close video popup">
+          Close
+        </button>
+        <video id="portfolio-video" class="w-full max-h-[75vh] rounded-md bg-black" controls playsinline></video>
+      </div>
+    </div>
+  </dialog>
+
   <script is:inline>
     document.addEventListener('keydown', (e) => {
       const dialog = document.getElementById('gallery-dialog');
@@ -520,6 +674,11 @@ const galleriesJson = JSON.stringify(allGalleries);
       if (e.key === 'ArrowLeft') { e.preventDefault(); prevImage(); }
       if (e.key === 'ArrowRight') { e.preventDefault(); nextImage(); }
       if (e.key === 'Escape') { e.preventDefault(); dialog.close(); }
+    });
+
+    document.getElementById('video-dialog')?.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeVideoModal();
     });
   </script>
 

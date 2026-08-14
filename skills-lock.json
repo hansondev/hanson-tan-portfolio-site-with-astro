@@ -13,11 +13,23 @@
       "skillPath": "skills/git-commit/SKILL.md",
       "computedHash": "2607fc60629b82b257136dd2a7a373f0a4466c0b49df7746d845d59313c99b21"
     },
+    "push": {
+      "source": "odysseus0/symphony",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/push/SKILL.md",
+      "computedHash": "f5dfa67e1d586a8b4c9e09b2469ca352244b2a82342961eaea70e53511508343"
+    },
     "react": {
       "source": "lobehub/lobehub",
       "sourceType": "github",
       "skillPath": ".agents/skills/react/SKILL.md",
       "computedHash": "c3fa38e2e0e2532a2a5a39fea780c22b9e0e485f172a3a4c6234615a75183131"
+    },
+    "secret-scanning": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/secret-scanning/SKILL.md",
+      "computedHash": "cc7de79bee80775578227a370637d0a83aa0f2cbec28374058899859261d2081"
     },
     "sop-creator": {
       "source": "coleam00/second-brain-skills",
